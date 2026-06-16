@@ -1,0 +1,47 @@
+version: "3.8"
+
+# Dog Agent — Simulation Mode (no hardware required)
+# Run: docker-compose -f docker-compose.sim.yml up
+
+services:
+  dog-agent-sim:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: dog-agent:latest
+    container_name: dog-agent-sim
+    restart: "no"
+    
+    environment:
+      - PYTHONUNBUFFERED=1
+      - DOG_AGENT_ENV=simulation
+      - DOG_AGENT_SIMULATE=1
+    
+    volumes:
+      - sim-data:/app/data
+    
+    # Expose ports for host access
+    ports:
+      - "9110:9110"  # Orchestrator
+      - "9111:9111"  # GPS
+      - "9112:9112"  # Sensors
+      - "9113:9113"  # Health
+      - "9114:9114"  # Geofence
+      - "9115:9115"  # Behavior
+      - "9116:9116"  # Voice
+      - "9117:9117"  # Data logger
+      - "9118:9118"  # Alerts
+      - "9120:9120"  # Power manager
+      - "9121:9121"  # Status LED
+      - "9122:9122"  # Environmental
+      - "9123:9123"  # Cache
+      - "9124:9124"  # Adaptive GPS
+      - "9125:9125"  # Offline queue
+      - "9126:9126"  # Activity scoring
+      - "9127:9127"  # Weather
+      - "9128:9128"  # Solar
+    
+    command: ["python", "src/main.py", "--simulate", "--all"]
+
+volumes:
+  sim-data:

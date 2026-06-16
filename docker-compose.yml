@@ -1,0 +1,85 @@
+version: "3.8"
+
+# Dog Agent — Docker Compose Configuration
+# Run: docker-compose up -d
+
+services:
+  dog-agent:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: dog-agent:latest
+    container_name: dog-agent
+    restart: unless-stopped
+    
+    # Device access for hardware
+    devices:
+      - /dev/i2c-1:/dev/i2c-1  # I2C for sensors
+      - /dev/ttyS0:/dev/ttyS0  # UART for GPS
+      - /dev/gpiomem:/dev/gpiomem  # GPIO access
+    
+    # Privileged for GPIO and hardware access
+    privileged: true
+    
+    # Environment
+    environment:
+      - PYTHONUNBUFFERED=1
+      - DOG_AGENT_ENV=docker
+      - DOG_AGENT_CONFIG=/app/config.yaml
+    
+    # Volumes
+    volumes:
+      - ./config.yaml:/app/config.yaml:ro
+      - dog-agent-data:/app/data
+      - /etc/localtime:/etc/localtime:ro
+    
+    # Network
+    network_mode: host
+    
+    # Resource limits (adjust based on Pi model)
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
+    
+    # Logging
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Optional: Redis for distributed caching
+  redis:
+    image: redis:7-alpine
+    container_name: dog-agent-redis
+    restart: unless-stopped
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes --maxmemory 64mb --maxmemory-policy allkeys-lru
+    profiles:
+      - cache
+
+  # Optional: Grafana for visualization
+  grafana:
+    image: grafana/grafana:latest
+    container_name: dog-agent-grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./docker/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./docker/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+    profiles:
+      - monitoring
+
+volumes:
+  dog-agent-data:
+  redis-data:
+  grafana-data:

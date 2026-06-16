@@ -74,6 +74,23 @@ logging:
   zones_file: "data/zones.json"
   retention_days: 90
 
+# Status LED (NeoPixel/WS2812B)
+status_led:
+  enabled: true
+  gpio_pin: 18               # GPIO 18 (PWM) - connect NeoPixel data here
+  brightness: 0.5            # 0.0-1.0 (50% recommended for power saving)
+  pattern: "solid"           # default pattern: solid | pulse | blink | rainbow_fade
+
+# Offline Queue
+offline_queue:
+  enabled: true
+  max_queue_size: 1000       # Max items in queue before dropping
+  retry_max: 10              # Max retry attempts before failing
+  batch_size: 5              # Items to process per batch upload
+  ping_host: "8.8.8.8"       # Host to ping for connectivity check
+  ping_interval_sec: 30      # Seconds between connectivity checks
+  retention_days: 30         # Days to keep old entries
+
 # Hermes Integration
 hermes:
   api_port: 9110             # Local API for Hermes to query

@@ -136,10 +136,17 @@ MODULE_DEFS: Dict[str, Dict[str, Any]] = {
         "sim_flag": None,
         "has_port": True,
     },
+    "power": {
+        "module": "power_manager",
+        "port": 9120,
+        "config_key": "power.deep_sleep.enabled",
+        "sim_flag": "--simulate",
+        "has_port": True,
+    },
 }
 
 # Ordering for dashboard display
-MODULE_ORDER = ["gps", "sensors", "health", "geofence", "behavior", "voice", "logger"]
+MODULE_ORDER = ["gps", "sensors", "health", "geofence", "behavior", "voice", "logger", "power"]
 
 # ---------------------------------------------------------------------------
 # Config helpers

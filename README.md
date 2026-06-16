@@ -1,141 +1,314 @@
-# 🐕 Dog Agent — Hermes-Powered Wearable for Your Dog
+# 🐕 Dog Agent — Your Dog's Personal AI Companion
 
-An open-source AI agent that lives in your dog's sweater. Built on **Hermes Agent** (Nous Research) running on a Raspberry Pi, with GPS tracking, health monitoring, behavioral analysis, and voice interaction — all sewn into a wearable dog sweater.
+**Never lose track of your best friend. Know they're safe, healthy, and happy — even when you're not there.**
 
-## Architecture
+Dog Agent is a lightweight AI system that lives right in your dog's collar or sweater. It tracks location, monitors health, learns routines, and alerts you to anything unusual. Built for Raspberry Pi with optional sensors you can sew right into the fabric.
 
-```
-┌─────────────────────────────────────────────────────┐
-│                   Dog Sweater                         │
-│  ┌──────────┐  ┌──────────────┐  ┌────────────────┐  │
-│  │ Pi Zero  │  │ Adafruit GPS │  │ LilyPad Arduino │  │
-│  │ 2W / 3B+ │  │ (UART GPIO)  │  │ (I2C sensors)  │  │
-│  └────┬─────┘  └──────┬───────┘  └───────┬────────┘  │
-│       │               │                   │           │
-│       └───────────────┼───────────────────┘           │
-│                       │                               │
-│              ┌────────▼────────┐                      │
-│              │  Hermes Agent   │                      │
-│              │  (dog profile)   │                      │
-│              └────────┬────────┘                      │
-│                       │                               │
-└───────────────────────┼───────────────────────────────┘
-                        │ Telegram / SMS / Voice
-                        ▼
-                    Dog Owner
-```
+---
 
-## Hardware Requirements
+## ✨ What Dog Agent Does For You
 
-| Component | Recommended | Budget Alternative |
-|-----------|-------------|-------------------|
-| **Pi** | Pi 3 B+ (1GB) | Pi Zero 2 W (512MB) |
-| **GPS** | Adafruit Ultimate GPS (PA1616S) | NEO-6M / NEO-8M |
-| **Sensors** | LilyPad Arduino + HR/temp/accel | Arduino Nano + standard sensors |
-| **Battery** | 5V 10,000mAh power bank | 18650 cells + step-up converter |
-| **Cellular** | SIM7600 HAT (optional) | — |
-| **Audio** | USB mic + small speaker | I2S MEMS mic + amp |
+### 🗺️ **Always Know Where They Are**
+Your dog goes for an unscheduled solo adventure? Dog Agent sends you their exact GPS location instantly. Get alerts the moment they leave your yard, with real-time tracking on a map. Even shows you which direction they're heading.
 
-Full parts list: [hardware/parts_list.md](hardware/parts_list.md)
+**The peace of mind:** Whether your dog is a known escape artist or just likes to explore, you'll know within seconds if they've gone beyond safe boundaries.
 
-## Software Modules
+---
 
-| Module | File | Purpose |
-|--------|------|---------|
-| **GPS Daemon** | `src/gps_daemon.py` | Reads NMEA from UART, serves location via local API |
-| **Sensor Daemon** | `src/sensor_daemon.py` | I2C bridge to LilyPad (HR, temp, accelerometer) |
-| **Health Monitor** | `src/health_monitor.py` | Vitals analysis, anomaly detection, alert triggers |
-| **Geofence** | `src/geofence.py` | Zone management, escape detection, arrival alerts |
-| **Behavior** | `src/behavior.py` | Routine learning, pattern detection, daily summaries |
-| **Voice** | `src/voice.py` | TTS for talking to dog, STT for commands |
-| **Bark Detector** | `src/bark_detector.py` | Microphone-based bark detection and classification |
-| **Alert Manager** | `src/alert_manager.py` | Routes alerts to Telegram, SMS, or local log |
-| **Data Logger** | `src/data_logger.py` | CSV/JSON logging for all sensor data |
-| **Orchestrator** | `src/main.py` | Daemon that runs all modules, serves Hermes API |
+### ❤️ **Catch Health Issues Early**
+Dog Agent monitors heart rate, temperature, and activity 24/7. It learns what's normal *for your specific dog* and alerts you when something's off.
 
-## Quick Start
+- **Heat stress alerts** when it's too hot for long walks
+- **Lethargy detection** when activity drops unexpectedly
+- **Nighttime restlessness** tracking (possible discomfort)
+- **Fever detection** from temperature trends
 
+**The peace of mind:** Early warning means early intervention. Small changes caught early can prevent bigger problems later.
+
+---
+
+### 🧠 **Understand Their Day**
+Ever wonder "What does my dog do all day?" Dog Agent learns their routine and gives you a daily summary:
+
+- How many walks they took and for how long
+- Quality of rest during the night
+- Activity level compared to their normal
+- Moments of excitement or stress
+
+**The insight:** Patterns reveal what makes your dog happy, when they need more exercise, or if something's disrupting their normal behavior.
+
+---
+
+### 🎤 **Talk to Your Dog (Really)**
+Heading home from work? Send a voice message through Dog Agent and it plays through a speaker in their sweater. They hear your voice, you feel more connected.
+
+**The connection:** Separation is easier when they know you're thinking of them.
+
+---
+
+### 🚨 **Smart Alerts That Matter**
+Dog Agent only bothers you when something actually needs your attention:
+
+| Alert | What It Means | What You Should Do |
+|-------|---------------|-------------------|
+| 🚨 **ESCAPE** | Dog left safe zone | Check map, call them back |
+| ⚠️ **HEALTH** | Heart rate/temp abnormal | Monitor, consider vet visit |
+| 🌡️ **HEAT** | Too hot for current activity | Shorten walk, find shade |
+| 📉 **ROUTINE** | Missed usual walk time | Make time for them today |
+| 🔋 **BATTERY** | Device needs charging | Plug in tonight |
+
+**The peace of mind:** No spam, no false alarms. Just the important stuff.
+
+---
+
+## 🛠️ How It Works
+
+### The Hardware
+A small Raspberry Pi computer (about the size of a credit card) plus:
+
+- **GPS module** — Knows exact location
+- **Heart rate sensor** — Sewn into chest area of sweater
+- **Temperature sensor** — Monitors body temp
+- **Accelerometer** — Detects movement, rest, and activity
+- **Small speaker** — Plays your voice messages
+- **LED status light** — Visual indicator on collar
+
+**Battery:** A small power bank provides 8-12 hours of runtime. Add the optional solar panel for continuous outdoor use.
+
+### The Software
+9 specialized modules work together, each handling one job:
+
+| Module | Port | What It Does |
+|--------|------|--------------|
+| **Orchestrator** | 9110 | Coordinates everything, shows dashboard |
+| **GPS** | 9111 | Tracks location, records routes |
+| **Sensors** | 9112 | Reads heart rate, temperature, movement |
+| **Health** | 9113 | Watches for concerning patterns |
+| **Geofence** | 9114 | Knows safe zones, alerts on escape |
+| **Behavior** | 9115 | Learns routines, detects deviations |
+| **Voice** | 9116 | Plays messages, listens for barks |
+| **Alerts** | 9118 | Sends notifications to your phone |
+| **Power** | 9120 | Manages battery life, sleep modes |
+
+**Plus new modules:** LED status, environmental sensors, adaptive GPS, offline queue, activity scoring, and weather integration.
+
+---
+
+## 🚀 Getting Started (5 Minutes)
+
+### Option 1: Run in Simulation Mode (No Hardware Needed)
 ```bash
-# 1. Install on the Pi
-git clone https://github.com/your-org/dog-agent.git ~/dog-agent
+git clone https://github.com/drwjkirkpatrick-web/dog-agent.git
+cd dog-agent
+pip install -r requirements.txt
+python src/main.py --simulate
+```
+
+This generates fake GPS tracks, heart rate data, and sensor readings so you can see how everything works.
+
+### Option 2: Run on Raspberry Pi
+```bash
+git clone https://github.com/drwjkirkpatrick-web/dog-agent.git ~/dog-agent
 cd ~/dog-agent
 bash setup.sh
+# Edit config.yaml with your settings
+python src/main.py --all
+```
 
-# 2. Configure
-cp config.example.yaml config.yaml
-# Edit config.yaml with your Telegram token, home zone, dog's name
+### Option 3: Docker (Easiest)
+```bash
+docker-compose -f docker-compose.sim.yml up
+```
 
-# 3. Run
-python src/main.py
+---
 
-# 4. Talk to your dog via Hermes
+## 🏠 The Perfect Setup
+
+### For Apartment Dogs
+- **Core features:** Geofence, health monitoring, daily summaries
+- **Battery:** 10,000mAh power bank (charges weekly)
+- **Best part:** Know they're safe while you're at work
+
+### For Adventure Dogs
+- **Add:** Solar panel, waterproof case, rugged harness
+- **Features:** GPS tracking, environmental monitoring, weather alerts
+- **Battery:** Solar keeps it running indefinitely
+- **Best part:** Track hikes, camping trips, off-leash time
+
+### For Senior Dogs
+- **Focus:** Health monitoring, gentle activity tracking
+- **Add:** Fall detection, medication reminders
+- **Best part:** Catch health changes early, peace of mind
+
+### For Working/Herding Breeds
+- **Add:** Activity scoring, detailed exercise tracking
+- **Features:** Compare to breed averages, set goals
+- **Best part:** Ensure they're getting the stimulation they need
+
+---
+
+## 📱 Talking to Your Dog Agent
+
+Once running, use **Hermes Agent** (or curl) to ask questions:
+
+```bash
+# Where is my dog?
+curl http://localhost:9111/gps
+
+# How is their health?
+curl http://localhost:9113/health
+
+# What's today's activity summary?
+curl http://localhost:9115/behavior/summary
+
+# Send a voice message
+curl -X POST http://localhost:9116/voice/say \
+  -d '{"text": "I\'ll be home soon!"}'
+```
+
+Or install the Hermes skill for natural language:
+```bash
 hermes --profile dog
 > "Where is Fido?"
+> "Is everything okay with the dog?"
 > "How was Fido's walk today?"
-> "Is Fido's heart rate normal?"
 ```
 
-## Hermes Integration
+---
 
-The dog agent runs as a **Hermes profile** with a custom skill. The skill teaches Hermes how to:
+## 🔋 Battery Life Guide
 
-- Query GPS location
-- Check health vitals
-- Manage geofences
-- Generate daily reports
-- Detect barking/patterns
-- Talk to the dog via speaker
+| Mode | Configuration | Runtime |
+|------|---------------|---------|
+| **Always On** | All features active | 8-12 hours |
+| **Smart Sleep** | Auto sleep at home | 24-36 hours |
+| **Deep Sleep** | Wake every 5 minutes | 3-5 days |
+| **+ Solar** | 2W solar panel | Indefinite (sunny days) |
 
-Install the skill:
-```bash
-hermes skills install dog-agent
-# or
-hermes --profile dog --skills dog-agent
-```
+**Tips:**
+- Deep sleep mode wakes for 30 seconds every 5 minutes to check GPS
+- Solar panel sewn into sweater back charges during walks
+- LED auto-dims at night to save power
 
-## Project Structure
+---
 
-```
-dog-agent/
-├── README.md              # This file
-├── setup.sh               # One-command install
-├── requirements.txt       # Python dependencies
-├── config.example.yaml    # Configuration template
-├── src/                   # Python modules
-│   ├── gps_daemon.py      # GPS NMEA reader
-│   ├── sensor_daemon.py   # LilyPad I2C bridge
-│   ├── health_monitor.py  # Vitals analysis
-│   ├── geofence.py        # Zone management
-│   ├── behavior.py         # Routine learning
-│   ├── voice.py           # TTS/STT
-│   ├── bark_detector.py   # Bark detection
-│   ├── alert_manager.py   # Alert routing
-│   ├── data_logger.py     # Data persistence
-│   └── main.py            # Orchestrator
-├── data/                  # Runtime data
-│   ├── health_logs/       # Vitals history
-│   ├── gps_tracks/        # GPS track logs
-│   ├── behavior/          # Behavior patterns
-│   └── zones.json         # Geofence definitions
-├── hardware/              # Hardware guides
-│   ├── parts_list.md      # BOM
-│   ├── wiring.md          # GPIO pinout
-│   ├── lilypad_sensor_guide.md
-│   └── sweater_pocket_pattern.md
-├── cron/                  # Scheduled tasks
-│   ├── daily_report.sh
-│   ├── health_check.sh
-│   └── battery_alert.sh
-├── hermes/                # Hermes integration
-│   ├── dog-agent-skill.md
-│   └── profile.yaml
-└── tests/                 # Unit tests
-    ├── test_gps.py
-    ├── test_geofence.py
-    ├── test_health.py
-    └── test_behavior.py
-```
+## 🧵 The Sweater (Yes, Really)
 
-## License
+Your dog wears the computer in a custom-fitted sweater:
 
-MIT
+- **Double-layer back panel** — Inner layer holds electronics, outer is normal fabric
+- **Removable pocket** — Velcro closure for washing
+- **Conductive thread** — Sewn-in sensors connect without wires
+- **Waterproof pouch** — Pi and battery stay dry
+- **Status LED** — Sewn into collar for visibility
+
+See `hardware/lilypad_sensor_guide.md` for sewing instructions. Or ask your crafty friend for help — the tech part is all figured out!
+
+---
+
+## 📊 What You Get
+
+Every day, Dog Agent generates:
+
+- **GPS track:** Where they went, how fast, total distance
+- **Health summary:** Heart rate range, temperature, rest quality
+- **Activity score:** Did they meet their exercise goals?
+- **Behavior notes:** Anything unusual about today
+- **Photo-worthy moments:** High activity detected (maybe a squirrel?)
+
+**Monthly:**
+- Trend analysis showing activity patterns
+- Health changes over time
+- Best walk routes discovered
+- Achievements unlocked
+
+---
+
+## 🔒 Privacy & Security
+
+- **Your data stays yours:** All data stored locally on the Pi
+- **Optional cloud:** Only if you configure Telegram or email
+- **No tracking:** We don't know where your dog is
+- **Open source:** You can audit every line of code
+
+---
+
+## 🆘 When Things Go Wrong
+
+| Problem | Solution |
+|---------|----------|
+| Lost GPS signal | LED turns yellow, tries again in 30 sec |
+| Battery dies | Last known location saved, BLE beacon activates |
+| WiFi disconnects | Offline queue stores data, uploads when reconnected |
+| False escape alert | Adjust geofence radius in config |
+| Too many notifications | Turn off non-critical alerts in config |
+
+---
+
+## 💡 30 Ways to Make Dog Agent Better
+
+See `IMPROVEMENTS.md` for the full roadmap. Highlights include:
+
+- **ML bark classification** — Know if it's play vs distress
+- **Fall detection** — For senior dogs
+- **Weather integration** — "Too hot for long walks" alerts
+- **Activity scoring** — Gamification to meet exercise goals
+- **Vet report generator** — Share health data with your vet
+- **Multi-dog support** — Track the whole pack
+
+---
+
+## 🎁 Why We Built This
+
+Because dogs are family. Because "they ran off" shouldn't be how a story ends. Because knowing they're okay — even when you can't be there — is priceless.
+
+**Dog Agent isn't about tracking. It's about caring.**
+
+---
+
+## 📚 Full Documentation
+
+| Document | What's Inside |
+|----------|---------------|
+| `README.md` | This file — the overview |
+| `IMPROVEMENTS.md` | 30 ideas for enhancements |
+| `hardware/parts_list.md` | Complete shopping list |
+| `hardware/wiring.md` | How to connect everything |
+| `hardware/lilypad_sensor_guide.md` | Sewing instructions |
+| `config.example.yaml` | All configuration options |
+| `setup.sh` | One-command installation |
+
+---
+
+## 🤝 Contributing
+
+Found a bug? Have an idea? Dog Agent is open source!
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Submit a pull request
+
+See `CONTRIBUTING.md` for guidelines.
+
+---
+
+## 📄 License
+
+MIT — Use it, modify it, share it. Just keep the attribution.
+
+---
+
+## 🙏 Acknowledgments
+
+- Built with **Hermes Agent** by Nous Research
+- Powered by **Raspberry Pi** and open source
+- Inspired by dogs everywhere who just want to know where their people are
+
+---
+
+**Ready to build one?** Start with simulation mode: `python src/main.py --simulate`
+
+**Questions?** Open an issue on GitHub or reach out to the community.
+
+*Built with ❤️ for dogs and their people.*

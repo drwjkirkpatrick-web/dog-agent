@@ -1,0 +1,80 @@
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environment
+venv/
+.venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Config (contains secrets)
+config.yaml
+.env
+
+# Data (runtime generated)
+data/
+!data/.gitkeep
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+.dockerignore
+
+# Python
+pytest_cache/
+.coverage
+htmlcov/
+
+# Node (if using web dashboard)
+node_modules/
+build/
+
+# SQLite
+*.db
+*.sqlite
+*.sqlite3
+
+# Temporary files
+*.tmp
+.orchestrator_tmp/
+
+# Model files (large)
+*.tflite
+*.h5
+*.pb
+models/
+
+# Solar cache
+solar_cache.json
