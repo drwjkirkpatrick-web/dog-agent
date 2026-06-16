@@ -96,3 +96,18 @@ hermes:
   api_port: 9110             # Local API for Hermes to query
   skill_name: "dog-agent"
   profile_name: "dog"
+
+# Emergency BLE Beacon (nRF52840/nRF51822 backup tracker)
+emergency_beacon:
+  enabled: false              # Set true when nRF module connected
+  gpio_pin: 17                # GPIO pin for heartbeat from Pi
+  uart_port: "/dev/ttyAMA1"  # UART port for nRF communication
+  uart_baudrate: 115200
+  i2c_bus: 1
+  i2c_address: 0x50           # nRF default I2C address
+  uuid: "dog-agent-emergency" # BLE advertisement UUID
+  tx_power: -4                # dBm: -40, -20, -16, -12, -8, -4, 0, +4
+  broadcast_interval_ms: 10000  # 10 seconds between broadcasts
+  heartbeat_timeout_sec: 60   # Seconds before activating beacon
+  location_file: "data/last_known_location.json"
+  api_port: 9129              # HTTP API port

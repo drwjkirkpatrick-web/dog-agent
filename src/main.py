@@ -143,10 +143,17 @@ MODULE_DEFS: Dict[str, Dict[str, Any]] = {
         "sim_flag": "--simulate",
         "has_port": True,
     },
+    "lorawan": {
+        "module": "lorawan_backup",
+        "port": 9140,
+        "config_key": "lorawan.enabled",
+        "sim_flag": "--simulate",
+        "has_port": True,
+    },
 }
 
 # Ordering for dashboard display
-MODULE_ORDER = ["gps", "sensors", "health", "geofence", "behavior", "voice", "logger", "power"]
+MODULE_ORDER = ["gps", "sensors", "health", "geofence", "behavior", "voice", "logger", "power", "lorawan"]
 
 # ---------------------------------------------------------------------------
 # Config helpers

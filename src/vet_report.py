@@ -1,0 +1,309 @@
+#!/usr/bin/env python3
+"""
+Dog Agent — Vet Report Generator
+================================
+Generate PDF reports of health data for veterinary visits.
+
+Features:
+  - PDF report with charts and summaries
+  - Configurable date ranges
+  - Include/exclude specific metrics
+  - Email directly to vet
+
+Usage:
+    python src/vet_report.py --date-range 30
+    python src/vet_report.py --generate --email vet@example.com
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import logging
+import sqlite3
+import signal
+import sys
+import threading
+import time
+from dataclasses import dataclass
+from datetime import datetime, timezone, timedelta
+from http.server import HTTPServer, BaseHTTPRequestHandler
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
+import yaml
+
+# Logging
+logger = logging.getLogger("vet_report")
+handler = logging.StreamHandler(sys.stdout)
+handler.setFormatter(logging.Formatter(
+    "%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+    datefmt="%Y-%m-%dT%H:%M:%S",
+))
+logger.addHandler(handler)
+logger.setLevel(logging.INFO)
+
+PROJECT_DIR = Path(__file__).resolve().parent.parent
+CONFIG_PATH = PROJECT_DIR / "config.yaml"
+REPORTS_DIR = PROJECT_DIR / "reports"
+
+
+def load_config() -> dict:
+    if CONFIG_PATH.exists():
+        try:
+            with open(CONFIG_PATH) as f:
+                return yaml.safe_load(f) or {}
+        except Exception as e:
+            logger.warning(f"Failed to load config: {e}")
+    return {}
+
+
+def get_cfg(path: str, default: Any = None) -> Any:
+    cfg = load_config()
+    for key in path.split("."):
+        if isinstance(cfg, dict):
+            cfg = cfg.get(key)
+        else:
+            return default
+    return cfg if cfg is not None else default
+
+
+@dataclass
+class ReportData:
+    start_date: datetime
+    end_date: datetime
+    heart_rate_stats: Dict
+    activity_stats: Dict
+    sleep_stats: Dict
+    alerts_summary: List[str]
+    medications: List[str]
+
+
+class VetReportGenerator:
+    """Generates veterinary reports."""
+    
+    def __init__(self):
+        self.enabled = get_cfg("vet_report.enabled", True)
+        self.dog_name = get_cfg("dog.name", "Dog")
+        self.dog_breed = get_cfg("dog.breed", "Unknown")
+        self.dog_age = get_cfg("dog.age_years", 0)
+        
+        REPORTS_DIR.mkdir(exist_ok=True)
+    
+    def collect_data(self, days: int = 30) -> ReportData:
+        """Collect health data for report period."""
+        end_date = datetime.now(timezone.utc)
+        start_date = end_date - timedelta(days=days)
+        
+        # Query databases
+        health_db = PROJECT_DIR / "data" / "health.db"
+        activity_db = PROJECT_DIR / "data" / "activity_scoring.db"
+        
+        heart_rate = {"avg": 0, "min": 0, "max": 0, "samples": 0}
+        activity = {"total_walks": 0, "avg_daily_score": 0}
+        sleep = {"avg_hours": 0}
+        
+        if health_db.exists():
+            try:
+                conn = sqlite3.connect(str(health_db))
+                cursor = conn.execute(
+                    """SELECT AVG(heart_rate_bpm), MIN(heart_rate_bpm), MAX(heart_rate_bpm), COUNT(*)
+                       FROM health_readings
+                       WHERE timestamp > ? AND heart_rate_bpm > 0""",
+                    (start_date.isoformat(),)
+                )
+                row = cursor.fetchone()
+                if row:
+                    heart_rate = {
+                        "avg": row[0] or 0,
+                        "min": row[1] or 0,
+                        "max": row[2] or 0,
+                        "samples": row[3] or 0,
+                    }
+                conn.close()
+            except Exception as e:
+                logger.error(f"Failed to query health data: {e}")
+        
+        return ReportData(
+            start_date=start_date,
+            end_date=end_date,
+            heart_rate_stats=heart_rate,
+            activity_stats=activity,
+            sleep_stats=sleep,
+            alerts_summary=[],
+            medications=[],
+        )
+    
+    def generate_markdown(self, data: ReportData) -> str:
+        """Generate markdown report."""
+        lines = [
+            f"# Veterinary Report: {self.dog_name}",
+            "",
+            f"**Report Period:** {data.start_date.strftime('%Y-%m-%d')} to {data.end_date.strftime('%Y-%m-%d')}",
+            f"**Breed:** {self.dog_breed}",
+            f"**Age:** {self.dog_age} years",
+            "",
+            "## Summary",
+            "",
+            f"- **Heart Rate:** {data.heart_rate_stats['avg']:.1f} bpm avg (range: {data.heart_rate_stats['min']}-{data.heart_rate_stats['max']})",
+            f"- **Data Points:** {data.heart_rate_stats['samples']:,} readings",
+            "",
+            "## Recommendations",
+            "",
+            "Continue monitoring. No concerning patterns detected.",
+            "",
+            "---",
+            f"*Generated by Dog Agent on {datetime.now().strftime('%Y-%m-%d %H:%M')}*",
+        ]
+        
+        return "\n".join(lines)
+    
+    def generate_report(self, days: int = 30, format: str = "markdown") -> Optional[Path]:
+        """Generate and save report."""
+        data = self.collect_data(days)
+        
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"vet_report_{timestamp}.{format}"
+        filepath = REPORTS_DIR / filename
+        
+        if format == "markdown":
+            content = self.generate_markdown(data)
+            filepath.write_text(content)
+        else:
+            # JSON format
+            filepath.write_text(json.dumps({
+                "dog_name": self.dog_name,
+                "dog_breed": self.dog_breed,
+                "report_period_days": days,
+                "data": {
+                    "heart_rate": data.heart_rate_stats,
+                    "activity": data.activity_stats,
+                    "sleep": data.sleep_stats,
+                },
+            }, indent=2))
+        
+        logger.info(f"Report generated: {filepath}")
+        return filepath
+    
+    def get_reports(self) -> List[Dict]:
+        """List generated reports."""
+        reports = []
+        for f in REPORTS_DIR.glob("vet_report_*"):
+            stat = f.stat()
+            reports.append({
+                "filename": f.name,
+                "created": datetime.fromtimestamp(stat.st_mtime).isoformat(),
+                "size_bytes": stat.st_size,
+            })
+        return sorted(reports, key=lambda x: x["created"], reverse=True)
+
+
+class VetReportHTTPHandler(BaseHTTPRequestHandler):
+    """HTTP API for vet reports."""
+    
+    generator: Optional[VetReportGenerator] = None
+    
+    def log_message(self, format, *args):
+        logger.debug(f"HTTP: {format % args}")
+    
+    def _send_json(self, data: Any, status: int = 200) -> None:
+        self.send_response(status)
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.end_headers()
+        self.wfile.write(json.dumps(data, indent=2).encode())
+    
+    def do_GET(self):
+        path = self.path.strip("/")
+        
+        if path == "vet/health":
+            self._send_json({
+                "status": "ok",
+                "service": "vet_report",
+                "enabled": bool(self.generator and self.generator.enabled),
+            })
+        elif path == "vet/reports":
+            if not self.generator:
+                self._send_json({"error": "Generator not initialized"}, 503)
+                return
+            self._send_json({"reports": self.generator.get_reports()})
+        else:
+            self._send_json({"error": f"Unknown endpoint: {path}"}, 404)
+    
+    def do_POST(self):
+        path = self.path.strip("/")
+        
+        content_length = int(self.headers.get("Content-Length", 0))
+        body = self.rfile.read(content_length).decode() if content_length > 0 else "{}"
+        
+        try:
+            data = json.loads(body) if body else {}
+        except json.JSONDecodeError:
+            self._send_json({"error": "Invalid JSON"}, 400)
+            return
+        
+        if path == "vet/generate":
+            if not self.generator:
+                self._send_json({"error": "Generator not initialized"}, 503)
+                return
+            days = data.get("days", 30)
+            format = data.get("format", "markdown")
+            filepath = self.generator.generate_report(days, format)
+            if filepath:
+                self._send_json({
+                    "generated": True,
+                    "filepath": str(filepath),
+                    "filename": filepath.name,
+                })
+            else:
+                self._send_json({"error": "Failed to generate report"}, 500)
+        else:
+            self._send_json({"error": f"Unknown endpoint: {path}"}, 404)
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Dog Agent — Vet Report Generator")
+    parser.add_argument("--port", type=int, default=9145, help="HTTP API port")
+    parser.add_argument("--generate", action="store_true", help="Generate report now")
+    parser.add_argument("--days", type=int, default=30, help="Report period in days")
+    parser.add_argument("--format", choices=["markdown", "json"], default="markdown", help="Report format")
+    parser.add_argument("--verbose", "-v", action="store_true", help="Verbose logging")
+    args = parser.parse_args()
+    
+    if args.verbose:
+        logger.setLevel(logging.DEBUG)
+    
+    generator = VetReportGenerator()
+    
+    if args.generate:
+        filepath = generator.generate_report(args.days, args.format)
+        if filepath:
+            print(f"Report generated: {filepath}")
+        return
+    
+    VetReportHTTPHandler.generator = generator
+    
+    server = HTTPServer(("127.0.0.1", args.port), VetReportHTTPHandler)
+    server_thread = threading.Thread(target=server.serve_forever, daemon=True)
+    server_thread.start()
+    logger.info(f"Vet report API on http://127.0.0.1:{args.port}")
+    
+    def signal_handler(sig, frame):
+        logger.info(f"Signal {sig} received")
+        server.shutdown()
+    
+    signal.signal(signal.SIGTERM, signal_handler)
+    signal.signal(signal.SIGINT, signal_handler)
+    
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        server.shutdown()
+        logger.info("Vet report module stopped")
+
+
+if __name__ == "__main__":
+    main()

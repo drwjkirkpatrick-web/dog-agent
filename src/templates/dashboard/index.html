@@ -1,0 +1,1330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ dog_name }} - Dog Agent Dashboard</title>
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --bg: #f1f5f9;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            background: var(--card);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 1.5rem;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .header h1 i {
+            color: var(--primary);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background: var(--bg);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border);
+        }
+
+        /* Navigation Tabs */
+        .nav-tabs {
+            background: var(--card);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+
+        .nav-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .nav-tab {
+            padding: 1rem 1.5rem;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .nav-tab:hover {
+            color: var(--text);
+            background: var(--bg);
+        }
+
+        .nav-tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+            font-weight: 500;
+        }
+
+        /* Main Content */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--card);
+            border-radius: 0.75rem;
+            border: 1px solid var(--border);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .card-title {
+            font-size: 1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Status Grid */
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .status-card {
+            background: var(--card);
+            border-radius: 0.75rem;
+            border: 1px solid var(--border);
+            padding: 1.25rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .status-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .status-icon.success { background: #d1fae5; color: var(--success); }
+        .status-icon.warning { background: #fef3c7; color: var(--warning); }
+        .status-icon.danger { background: #fee2e2; color: var(--danger); }
+        .status-icon.info { background: #dbeafe; color: var(--primary); }
+
+        .status-content {
+            flex: 1;
+        }
+
+        .status-value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .status-label {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        .status-status {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 9999px;
+            margin-top: 0.5rem;
+            display: inline-block;
+        }
+
+        .status-status.online {
+            background: #d1fae5;
+            color: var(--success);
+        }
+
+        .status-status.offline {
+            background: #fee2e2;
+            color: var(--danger);
+        }
+
+        /* Map */
+        #map-container {
+            height: 500px;
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+
+        #map {
+            height: 100%;
+            width: 100%;
+        }
+
+        /* Charts */
+        .chart-container {
+            height: 300px;
+            position: relative;
+        }
+
+        /* Timeline */
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0.5rem;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--border);
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-bottom: 1.5rem;
+        }
+
+        .timeline-dot {
+            position: absolute;
+            left: -1.75rem;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid var(--card);
+        }
+
+        .timeline-dot.walk { background: var(--success); }
+        .timeline-dot.rest { background: var(--primary); }
+        .timeline-dot.alert { background: var(--danger); }
+        .timeline-dot.meal { background: var(--warning); }
+
+        .timeline-content {
+            background: var(--bg);
+            padding: 1rem;
+            border-radius: 0.5rem;
+        }
+
+        .timeline-time {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .timeline-title {
+            font-weight: 500;
+            margin-top: 0.25rem;
+        }
+
+        .timeline-desc {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+
+        /* Photo Gallery */
+        .photo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .photo-item {
+            aspect-ratio: 1;
+            background: var(--bg);
+            border-radius: 0.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            border: 2px dashed var(--border);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .photo-item:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .photo-item i {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Settings */
+        .setting-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .setting-label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .setting-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .setting-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .setting-hint {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+
+        /* Alerts */
+        .alert-list {
+            space-y: 0.75rem;
+        }
+
+        .alert-item {
+            padding: 1rem;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .alert-item.critical {
+            background: #fee2e2;
+            border: 1px solid #fecaca;
+        }
+
+        .alert-item.warning {
+            background: #fef3c7;
+            border: 1px solid #fde68a;
+        }
+
+        .alert-item.info {
+            background: #dbeafe;
+            border: 1px solid #bfdbfe;
+        }
+
+        .alert-icon {
+            font-size: 1.25rem;
+        }
+
+        .alert-item.critical .alert-icon { color: var(--danger); }
+        .alert-item.warning .alert-icon { color: var(--warning); }
+        .alert-item.info .alert-icon { color: var(--primary); }
+
+        .alert-content {
+            flex: 1;
+        }
+
+        .alert-title {
+            font-weight: 500;
+        }
+
+        .alert-time {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* Connection Status */
+        .connection-status {
+            position: fixed;
+            bottom: 1rem;
+            right: 1rem;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            z-index: 1000;
+        }
+
+        .connection-status.online {
+            background: #d1fae5;
+            color: var(--success);
+        }
+
+        .connection-status.offline {
+            background: #fee2e2;
+            color: var(--danger);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1rem;
+            }
+
+            .header-actions .btn-text {
+                display: none;
+            }
+
+            .status-grid {
+                grid-template-columns: 1fr;
+            }
+
+            #map-container {
+                height: 350px;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>
+            <i class="fas fa-paw"></i>
+            {{ dog_name }}'s Dashboard
+        </h1>
+        <div class="header-actions">
+            <button class="btn btn-secondary" id="refresh-btn">
+                <i class="fas fa-sync-alt"></i>
+                <span class="btn-text">Refresh</span>
+            </button>
+            <button class="btn btn-secondary" id="settings-btn">
+                <i class="fas fa-cog"></i>
+            </button>
+            <button class="btn btn-secondary" id="logout-btn">
+                <i class="fas fa-sign-out-alt"></i>
+            </button>
+        </div>
+    </header>
+
+    <nav class="nav-tabs">
+        <button class="nav-tab active" data-tab="overview">
+            <i class="fas fa-home"></i> Overview
+        </button>
+        <button class="nav-tab" data-tab="map">
+            <i class="fas fa-map-marker-alt"></i> Live Map
+        </button>
+        <button class="nav-tab" data-tab="health">
+            <i class="fas fa-heartbeat"></i> Health
+        </button>
+        <button class="nav-tab" data-tab="behavior">
+            <i class="fas fa-chart-line"></i> Behavior
+        </button>
+        <button class="nav-tab" data-tab="photos">
+            <i class="fas fa-images"></i> Photos
+        </button>
+        <button class="nav-tab" data-tab="settings">
+            <i class="fas fa-sliders-h"></i> Settings
+        </button>
+    </nav>
+
+    <div class="container">
+        <!-- Overview Tab -->
+        <div class="tab-content active" id="overview">
+            <div class="status-grid">
+                <div class="status-card">
+                    <div class="status-icon info">
+                        <i class="fas fa-location-arrow"></i>
+                    </div>
+                    <div class="status-content">
+                        <div class="status-value" id="status-location">Unknown</div>
+                        <div class="status-label">Location</div>
+                        <span class="status-status offline" id="gps-status">No Fix</span>
+                    </div>
+                </div>
+                <div class="status-card">
+                    <div class="status-icon success">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                    <div class="status-content">
+                        <div class="status-value" id="status-hr">-- bpm</div>
+                        <div class="status-label">Heart Rate</div>
+                        <span class="status-status offline" id="hr-status">Unknown</span>
+                    </div>
+                </div>
+                <div class="status-card">
+                    <div class="status-icon warning">
+                        <i class="fas fa-thermometer-half"></i>
+                    </div>
+                    <div class="status-content">
+                        <div class="status-value" id="status-temp">-- °C</div>
+                        <div class="status-label">Temperature</div>
+                        <span class="status-status offline" id="temp-status">Unknown</span>
+                    </div>
+                </div>
+                <div class="status-card">
+                    <div class="status-icon info">
+                        <i class="fas fa-battery-three-quarters"></i>
+                    </div>
+                    <div class="status-content">
+                        <div class="status-value" id="status-battery">--%</div>
+                        <div class="status-label">Battery</div>
+                        <span class="status-status online" id="battery-status">Good</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-bell"></i>
+                        Recent Alerts
+                    </h3>
+                    <button class="btn btn-secondary" onclick="acknowledgeAllAlerts()">
+                        Acknowledge All
+                    </button>
+                </div>
+                <div class="alert-list" id="alert-list">
+                    <div class="alert-item info">
+                        <i class="fas fa-info-circle alert-icon"></i>
+                        <div class="alert-content">
+                            <div class="alert-title">No new alerts</div>
+                            <div class="alert-time">Just now</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-chart-area"></i>
+                        Quick Health Overview
+                    </h3>
+                </div>
+                <div class="chart-container">
+                    <canvas id="overview-chart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Live Map Tab -->
+        <div class="tab-content" id="map">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-map"></i>
+                        Live Location & Trail
+                    </h3>
+                    <div>
+                        <button class="btn btn-secondary" id="center-map-btn">
+                            <i class="fas fa-crosshairs"></i> Center
+                        </button>
+                        <button class="btn btn-secondary" id="clear-trail-btn">
+                            <i class="fas fa-trash"></i> Clear Trail
+                        </button>
+                    </div>
+                </div>
+                <div id="map-container">
+                    <div id="map"></div>
+                </div>
+                <div style="margin-top: 1rem; display: flex; gap: 1rem; flex-wrap: wrap;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <span style="width: 12px; height: 12px; background: var(--success); border-radius: 50%; display: inline-block;"></span>
+                        <span style="font-size: 0.875rem;">Home Zone</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <span style="width: 12px; height: 12px; background: var(--primary); border-radius: 50%; display: inline-block;"></span>
+                        <span style="font-size: 0.875rem;">Current Location</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <span style="width: 20px; height: 3px; background: var(--primary); display: inline-block;"></span>
+                        <span style="font-size: 0.875rem;">GPS Trail</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Health Tab -->
+        <div class="tab-content" id="health">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-heartbeat"></i>
+                        Heart Rate History
+                    </h3>
+                </div>
+                <div class="chart-container">
+                    <canvas id="hr-chart"></canvas>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-thermometer"></i>
+                        Temperature History
+                    </h3>
+                </div>
+                <div class="chart-container">
+                    <canvas id="temp-chart"></canvas>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-running"></i>
+                        Activity Level
+                    </h3>
+                </div>
+                <div class="chart-container">
+                    <canvas id="activity-chart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Behavior Tab -->
+        <div class="tab-content" id="behavior">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-calendar-day"></i>
+                        Today's Timeline
+                    </h3>
+                </div>
+                <div class="timeline" id="behavior-timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-dot rest"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-time">06:00 AM</div>
+                            <div class="timeline-title">Woke up</div>
+                            <div class="timeline-desc">Normal morning routine</div>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-dot walk"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-time">07:30 AM</div>
+                            <div class="timeline-title">Morning walk</div>
+                            <div class="timeline-desc">45 minutes, moderate activity</div>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-dot meal"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-time">08:00 AM</div>
+                            <div class="timeline-title">Breakfast</div>
+                            <div class="timeline-desc">Regular meal consumed</div>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-dot rest"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-time">09:00 AM - Now</div>
+                            <div class="timeline-title">Resting</div>
+                            <div class="timeline-desc">Normal rest period</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-chart-bar"></i>
+                        Activity Patterns
+                    </h3>
+                </div>
+                <div class="chart-container">
+                    <canvas id="behavior-chart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Photos Tab -->
+        <div class="tab-content" id="photos">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-images"></i>
+                        Photo Gallery
+                    </h3>
+                    <button class="btn btn-primary" id="upload-photo-btn">
+                        <i class="fas fa-upload"></i> Upload Photo
+                    </button>
+                </div>
+                <div class="photo-grid" id="photo-grid">
+                    <div class="photo-item" onclick="uploadPhoto()">
+                        <i class="fas fa-plus"></i>
+                        <span>Add Photo</span>
+                    </div>
+                    <div class="photo-item">
+                        <i class="fas fa-image"></i>
+                        <span>Photo Placeholder</span>
+                        <small style="margin-top: 0.25rem;">Coming soon</small>
+                    </div>
+                    <div class="photo-item">
+                        <i class="fas fa-image"></i>
+                        <span>Photo Placeholder</span>
+                        <small style="margin-top: 0.25rem;">Coming soon</small>
+                    </div>
+                </div>
+                <p style="text-align: center; color: var(--text-muted); margin-top: 2rem;">
+                    <i class="fas fa-info-circle"></i>
+                    Photo upload and management coming in a future update.
+                </p>
+            </div>
+        </div>
+
+        <!-- Settings Tab -->
+        <div class="tab-content" id="settings">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-sliders-h"></i>
+                        Dashboard Settings
+                    </h3>
+                </div>
+                
+                <div class="setting-group">
+                    <label class="setting-label">Refresh Interval</label>
+                    <select class="setting-input" id="refresh-interval">
+                        <option value="1">1 second</option>
+                        <option value="5" selected>5 seconds</option>
+                        <option value="10">10 seconds</option>
+                        <option value="30">30 seconds</option>
+                        <option value="60">1 minute</option>
+                    </select>
+                    <p class="setting-hint">How often to update dashboard data</p>
+                </div>
+
+                <div class="setting-group">
+                    <label class="setting-label">Map Trail Length</label>
+                    <select class="setting-input" id="trail-length">
+                        <option value="50">Last 50 points</option>
+                        <option value="100" selected>Last 100 points</option>
+                        <option value="500">Last 500 points</option>
+                        <option value="1000">Last 1000 points</option>
+                    </select>
+                    <p class="setting-hint">Number of GPS points to show on the map</p>
+                </div>
+
+                <div class="setting-group">
+                    <label class="setting-label">Notification Preferences</label>
+                    <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                        <label style="display: flex; align-items: center; gap: 0.5rem;">
+                            <input type="checkbox" checked> Health alerts
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 0.5rem;">
+                            <input type="checkbox" checked> Geofence alerts
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 0.5rem;">
+                            <input type="checkbox" checked> Behavior notifications
+                        </label>
+                    </div>
+                </div>
+
+                <div class="setting-group">
+                    <button class="btn btn-primary" onclick="saveSettings()">
+                        <i class="fas fa-save"></i> Save Settings
+                    </button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-info-circle"></i>
+                        System Information
+                    </h3>
+                </div>
+                <div class="setting-group">
+                    <label class="setting-label">Dog Agent Version</label>
+                    <p>v1.0.0</p>
+                </div>
+                <div class="setting-group">
+                    <label class="setting-label">Last Update</label>
+                    <p id="system-last-update">Never</p>
+                </div>
+                <div class="setting-group">
+                    <label class="setting-label">GPS Points Stored</label>
+                    <p id="system-gps-points">0</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Connection Status -->
+    <div class="connection-status offline" id="connection-status">
+        <i class="fas fa-circle"></i>
+        <span>Connecting...</span>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <script>
+        // Configuration
+        const CONFIG = {
+            homeLat: {{ home_lat }},
+            homeLon: {{ home_lon }},
+            refreshInterval: {{ refresh_interval }},
+            dogName: "{{ dog_name }}"
+        };
+
+        // State
+        let map = null;
+        let marker = null;
+        let trailLine = null;
+        let homeCircle = null;
+        let charts = {};
+        let eventSource = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            initTabs();
+            initMap();
+            initCharts();
+            startEventSource();
+            refreshData();
+            
+            // Set up refresh interval
+            setInterval(refreshData, CONFIG.refreshInterval * 1000);
+            
+            // Button handlers
+            document.getElementById('refresh-btn').addEventListener('click', refreshData);
+            document.getElementById('center-map-btn').addEventListener('click', centerMap);
+            document.getElementById('clear-trail-btn').addEventListener('click', clearTrail);
+            document.getElementById('settings-btn').addEventListener('click', () => switchTab('settings'));
+            document.getElementById('logout-btn').addEventListener('click', logout);
+        });
+
+        // Tab switching
+        function initTabs() {
+            const tabs = document.querySelectorAll('.nav-tab');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const tabId = tab.dataset.tab;
+                    switchTab(tabId);
+                });
+            });
+        }
+
+        function switchTab(tabId) {
+            // Update tabs
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            document.querySelector(`.nav-tab[data-tab="${tabId}"]`).classList.add('active');
+            
+            // Update content
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            
+            // Resize map if needed
+            if (tabId === 'map' && map) {
+                setTimeout(() => map.invalidateSize(), 100);
+            }
+        }
+
+        // Map initialization
+        function initMap() {
+            map = L.map('map').setView([CONFIG.homeLat, CONFIG.homeLon], 15);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+            
+            // Home circle
+            homeCircle = L.circle([CONFIG.homeLat, CONFIG.homeLon], {
+                color: '#10b981',
+                fillColor: '#10b981',
+                fillOpacity: 0.1,
+                radius: 50
+            }).addTo(map);
+            
+            homeCircle.bindPopup("Home Zone");
+            
+            // Dog marker
+            const dogIcon = L.divIcon({
+                className: 'custom-div-icon',
+                html: `<div style="background: #2563eb; width: 20px; height: 20px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>`,
+                iconSize: [20, 20],
+                iconAnchor: [10, 10]
+            });
+            
+            marker = L.marker([CONFIG.homeLat, CONFIG.homeLon], { icon: dogIcon }).addTo(map);
+            marker.bindPopup(`${CONFIG.dogName}'s Location`);
+            
+            // Trail line
+            trailLine = L.polyline([], {
+                color: '#2563eb',
+                weight: 3,
+                opacity: 0.7
+            }).addTo(map);
+        }
+
+        function centerMap() {
+            if (marker) {
+                map.setView(marker.getLatLng(), 16);
+            }
+        }
+
+        function clearTrail() {
+            trailLine.setLatLngs([]);
+        }
+
+        // Charts
+        function initCharts() {
+            const commonOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    x: {
+                        grid: { display: false }
+                    },
+                    y: {
+                        beginAtZero: false,
+                        grid: { color: '#e2e8f0' }
+                    }
+                }
+            };
+            
+            // Overview chart
+            const overviewCtx = document.getElementById('overview-chart').getContext('2d');
+            charts.overview = new Chart(overviewCtx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Heart Rate',
+                        data: [],
+                        borderColor: '#2563eb',
+                        backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: commonOptions
+            });
+            
+            // HR chart
+            const hrCtx = document.getElementById('hr-chart').getContext('2d');
+            charts.hr = new Chart(hrCtx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Heart Rate (bpm)',
+                        data: [],
+                        borderColor: '#ef4444',
+                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: commonOptions
+            });
+            
+            // Temp chart
+            const tempCtx = document.getElementById('temp-chart').getContext('2d');
+            charts.temp = new Chart(tempCtx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Temperature (°C)',
+                        data: [],
+                        borderColor: '#f59e0b',
+                        backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    ...commonOptions,
+                    scales: {
+                        ...commonOptions.scales,
+                        y: {
+                            ...commonOptions.scales.y,
+                            min: 36,
+                            max: 42
+                        }
+                    }
+                }
+            });
+            
+            // Activity chart
+            const activityCtx = document.getElementById('activity-chart').getContext('2d');
+            charts.activity = new Chart(activityCtx, {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Activity Level',
+                        data: [],
+                        backgroundColor: '#10b981',
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    ...commonOptions,
+                    scales: {
+                        ...commonOptions.scales,
+                        y: {
+                            ...commonOptions.scales.y,
+                            min: 0,
+                            max: 1
+                        }
+                    }
+                }
+            });
+            
+            // Behavior chart
+            const behaviorCtx = document.getElementById('behavior-chart').getContext('2d');
+            charts.behavior = new Chart(behaviorCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['6AM', '9AM', '12PM', '3PM', '6PM', '9PM', '12AM', '3AM', '6AM'],
+                    datasets: [{
+                        label: 'Activity Level',
+                        data: [0.8, 0.9, 0.3, 0.5, 0.95, 0.4, 0.1, 0.05, 0.8],
+                        backgroundColor: '#2563eb',
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    ...commonOptions,
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+
+        // Data fetching
+        async function refreshData() {
+            try {
+                // Fetch status
+                const statusRes = await fetch('/api/status');
+                if (statusRes.ok) {
+                    const status = await statusRes.json();
+                    updateStatus(status);
+                }
+                
+                // Fetch location
+                const locRes = await fetch('/api/location');
+                if (locRes.ok) {
+                    const location = await locRes.json();
+                    updateLocation(location);
+                }
+                
+                // Fetch history
+                const histRes = await fetch('/api/history');
+                if (histRes.ok) {
+                    const history = await histRes.json();
+                    updateTrail(history.points);
+                }
+                
+                // Fetch health
+                const healthRes = await fetch('/api/health');
+                if (healthRes.ok) {
+                    const health = await healthRes.json();
+                    updateHealth(health);
+                }
+                
+                // Fetch alerts
+                const alertsRes = await fetch('/api/alerts');
+                if (alertsRes.ok) {
+                    const alerts = await alertsRes.json();
+                    updateAlerts(alerts.alerts);
+                }
+                
+                updateConnectionStatus(true);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                updateConnectionStatus(false);
+            }
+        }
+
+        // Server-Sent Events
+        function startEventSource() {
+            if (eventSource) {
+                eventSource.close();
+            }
+            
+            eventSource = new EventSource('/api/events');
+            
+            eventSource.onmessage = (event) => {
+                try {
+                    const data = JSON.parse(event.data);
+                    updateStatus(data);
+                } catch (e) {
+                    console.error('Error parsing SSE data:', e);
+                }
+            };
+            
+            eventSource.onerror = () => {
+                updateConnectionStatus(false);
+                // Reconnect after 5 seconds
+                setTimeout(startEventSource, 5000);
+            };
+            
+            eventSource.onopen = () => {
+                updateConnectionStatus(true);
+            };
+        }
+
+        // Update functions
+        function updateStatus(data) {
+            if (data.location) {
+                document.getElementById('status-location').textContent = 
+                    data.location.valid ? 'Known' : 'Unknown';
+                document.getElementById('gps-status').textContent = 
+                    data.location.valid ? 'GPS Fix' : 'No Fix';
+                document.getElementById('gps-status').className = 
+                    'status-status ' + (data.location.valid ? 'online' : 'offline');
+            }
+            
+            if (data.system) {
+                document.getElementById('status-battery').textContent = 
+                    (data.system.battery_percent || 0) + '%';
+            }
+            
+            // Update system info
+            document.getElementById('system-gps-points').textContent = data.gps_points || 0;
+            if (data.system?.last_update) {
+                document.getElementById('system-last-update').textContent = 
+                    new Date(data.system.last_update).toLocaleString();
+            }
+        }
+
+        function updateLocation(location) {
+            if (location.valid && map && marker) {
+                const latlng = [location.lat, location.lon];
+                marker.setLatLng(latlng);
+            }
+        }
+
+        function updateTrail(points) {
+            if (trailLine && points && points.length > 0) {
+                const latlngs = points
+                    .filter(p => p.lat && p.lon)
+                    .map(p => [p.lat, p.lon]);
+                trailLine.setLatLngs(latlngs);
+            }
+        }
+
+        function updateHealth(health) {
+            if (health.current) {
+                const v = health.current;
+                document.getElementById('status-hr').textContent = 
+                    (v.heart_rate_bpm || '--') + ' bpm';
+                document.getElementById('status-temp').textContent = 
+                    (v.temperature_c || '--') + ' °C';
+                
+                // Update status indicators
+                const hrStatus = v.heart_rate_bpm > 0 ? 'online' : 'offline';
+                const tempStatus = v.temperature_c > 0 ? 'online' : 'offline';
+                document.getElementById('hr-status').textContent = 
+                    v.heart_rate_bpm > 0 ? 'Normal' : 'Unknown';
+                document.getElementById('hr-status').className = 'status-status ' + hrStatus;
+                document.getElementById('temp-status').textContent = 
+                    v.temperature_c > 0 ? 'Normal' : 'Unknown';
+                document.getElementById('temp-status').className = 'status-status ' + tempStatus;
+            }
+            
+            if (health.history && health.history.length > 0) {
+                const labels = health.history.map(h => {
+                    const t = new Date(h.timestamp);
+                    return t.getHours() + ':' + String(t.getMinutes()).padStart(2, '0');
+                });
+                const hrData = health.history.map(h => h.heart_rate_bpm || 0);
+                const tempData = health.history.map(h => h.temperature_c || 0);
+                const activityData = health.history.map(h => h.activity_level || 0);
+                
+                // Update charts
+                if (charts.overview) {
+                    charts.overview.data.labels = labels;
+                    charts.overview.data.datasets[0].data = hrData;
+                    charts.overview.update('none');
+                }
+                if (charts.hr) {
+                    charts.hr.data.labels = labels;
+                    charts.hr.data.datasets[0].data = hrData;
+                    charts.hr.update('none');
+                }
+                if (charts.temp) {
+                    charts.temp.data.labels = labels;
+                    charts.temp.data.datasets[0].data = tempData;
+                    charts.temp.update('none');
+                }
+                if (charts.activity) {
+                    charts.activity.data.labels = labels;
+                    charts.activity.data.datasets[0].data = activityData;
+                    charts.activity.update('none');
+                }
+            }
+        }
+
+        function updateAlerts(alerts) {
+            const container = document.getElementById('alert-list');
+            if (!alerts || alerts.length === 0) {
+                container.innerHTML = `
+                    <div class="alert-item info">
+                        <i class="fas fa-info-circle alert-icon"></i>
+                        <div class="alert-content">
+                            <div class="alert-title">No new alerts</div>
+                            <div class="alert-time">Just now</div>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = alerts.slice(0, 5).map(alert => {
+                const icon = alert.level === 'critical' ? 'fa-exclamation-circle' :
+                            alert.level === 'warning' ? 'fa-exclamation-triangle' : 'fa-info-circle';
+                const time = new Date(alert.timestamp).toLocaleString();
+                return `
+                    <div class="alert-item ${alert.level}">
+                        <i class="fas ${icon} alert-icon"></i>
+                        <div class="alert-content">
+                            <div class="alert-title">${alert.message}</div>
+                            <div class="alert-time">${time}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updateConnectionStatus(connected) {
+            const status = document.getElementById('connection-status');
+            status.className = 'connection-status ' + (connected ? 'online' : 'offline');
+            status.innerHTML = `
+                <i class="fas fa-circle"></i>
+                <span>${connected ? 'Connected' : 'Disconnected'}</span>
+            `;
+        }
+
+        // Settings
+        function saveSettings() {
+            const interval = document.getElementById('refresh-interval').value;
+            CONFIG.refreshInterval = parseInt(interval);
+            alert('Settings saved!');
+        }
+
+        function acknowledgeAllAlerts() {
+            alert('All alerts acknowledged');
+        }
+
+        // Photo upload placeholder
+        function uploadPhoto() {
+            alert('Photo upload coming soon!');
+        }
+
+        // Logout
+        async function logout() {
+            try {
+                await fetch('/logout');
+                window.location.reload();
+            } catch (e) {
+                window.location.reload();
+            }
+        }
+    </script>
+</body>
+</html>
