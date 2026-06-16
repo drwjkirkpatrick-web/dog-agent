@@ -1,6 +1,26 @@
 # 🐕 Dog Agent — Your Dog's Personal AI Companion
 
-**Never lose track of your best friend. Know they're safe, healthy, and happy — even when you're not there.**
+[![Version](https://img.shields.io/badge/version-2.0-blue)](https://github.com/drwjkirkpatrick-web/dog-agent)
+[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+
+> **Never lose track of your best friend. Know they're safe, healthy, and happy — even when you're not there.**
+
+## 🆕 Version 2.0 — "Supercharged"
+
+We've added **8 new modules** to make Dog Agent more powerful than ever:
+
+| New Feature | Benefit |
+|-------------|---------|
+| 🔋 **Deep Sleep Mode** | Battery lasts 3-5 days instead of hours |
+| 💡 **Status LED** | See system status at a glance on the collar |
+| 🌡️ **Environmental Sensors** | Detect heat stress, falls, UV exposure |
+| ⚡ **Smart GPS** | 80% power savings with adaptive rate control |
+| 📶 **Offline Queue** | No data lost when WiFi drops |
+| 🏆 **Activity Scoring** | Gamified goals keep your dog healthy |
+| 🌦️ **Weather Integration** | "Too hot for long walks" alerts |
+| ☀️ **Solar Monitoring** | Track solar charging efficiency |
+
+**Total: 17 modules, 13,700 lines of code, fully open source.**
 
 Dog Agent is a lightweight AI system that lives right in your dog's collar or sweater. It tracks location, monitors health, learns routines, and alerts you to anything unusual. Built for Raspberry Pi with optional sensors you can sew right into the fabric.
 
@@ -271,12 +291,17 @@ Because dogs are family. Because "they ran off" shouldn't be how a story ends. B
 | Document | What's Inside |
 |----------|---------------|
 | `README.md` | This file — the overview |
-| `IMPROVEMENTS.md` | 30 ideas for enhancements |
-| `hardware/parts_list.md` | Complete shopping list |
-| `hardware/wiring.md` | How to connect everything |
-| `hardware/lilypad_sensor_guide.md` | Sewing instructions |
-| `config.example.yaml` | All configuration options |
-| `setup.sh` | One-command installation |
+| `IMPROVEMENTS.md` | 30 ideas for future enhancements |
+| `Dockerfile` | Container build for Raspberry Pi |
+| `docker-compose.yml` | Production deployment |
+| `docker-compose.sim.yml` | Simulation mode (no hardware) |
+| `hardware/parts_list.md` | Complete shopping list ($132-$303) |
+| `hardware/wiring.md` | GPIO pinout diagrams |
+| `hardware/lilypad_sensor_guide.md` | Sewing conductive thread guide |
+| `config.example.yaml` | All 150+ configuration options |
+| `setup.sh` | One-command installation script |
+| `hermes/dog-agent-skill.md` | Hermes Agent skill documentation |
+| `hermes/profile.yaml` | Agent personality configuration |
 
 ---
 
@@ -309,6 +334,10 @@ MIT — Use it, modify it, share it. Just keep the attribution.
 
 **Ready to build one?** Start with simulation mode: `python src/main.py --simulate`
 
-**Questions?** Open an issue on GitHub or reach out to the community.
+**Questions?** Open an issue on [GitHub](https://github.com/drwjkirkpatrick-web/dog-agent) or reach out to the community.
+
+---
+
+**Version 2.0** — 17 modules | 13,700 lines | Open source forever
 
 *Built with ❤️ for dogs and their people.*
