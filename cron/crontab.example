@@ -1,0 +1,31 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# Dog Agent — Crontab Example
+# ──────────────────────────────────────────────────────────────────────────────
+# Install with: crontab cron/crontab.example
+# Or edit:      crontab -e
+#
+# All paths assume the project is at /home/pi/projects/dog-agent (adjust as
+# needed for your setup). Logs are written to cron_logs/ for debugging.
+#
+# ─── Daily report (every day at 21:00) ──────────────────────────────────────
+# Generates a behavior summary and sends via Telegram (or prints to stdout).
+# Also triggers a health snapshot at the same time.
+#
+0 21 * * * cd /home/pi/projects/dog-agent && ./cron/daily_report.sh >> cron_logs/daily_report.log 2>&1
+
+# ─── Health check (every 30 minutes) ────────────────────────────────────────
+# Queries the health endpoint and forwards any active alerts to alert_manager.
+#
+*/30 * * * * cd /home/pi/projects/dog-agent && ./cron/health_check.sh >> cron_logs/health_check.log 2>&1
+
+# ─── Battery check (every 60 minutes) ───────────────────────────────────────
+# Reads battery voltage and alerts if below 3.4V (LiPo threshold).
+#
+0 * * * * cd /home/pi/projects/dog-agent && ./cron/battery_alert.sh >> cron_logs/battery_alert.log 2>&1
+
+# ─── Optional: Log rotation placeholder ───────────────────────────────────────
+# The data_logger handles its own retention — cron jobs log to cron_logs/
+# which you may want to rotate with logrotate or a monthly cleanup rule.
+#
+# Example cleanup (runs 1st of month, removes logs older than 90 days):
+# 0 0 1 * * find /home/pi/projects/dog-agent/cron_logs -name '*.log' -mtime +90 -delete

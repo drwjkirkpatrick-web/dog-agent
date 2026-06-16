@@ -1,0 +1,81 @@
+# Dog Agent Configuration
+# Copy to config.yaml and edit
+
+# Dog Profile
+dog:
+  name: "Fido"
+  breed: "Labrador Retriever"
+  weight_kg: 30
+  age_years: 4
+  resting_hr_bpm: 70        # Normal resting heart rate
+  normal_temp_c: 38.5        # Normal temperature range
+  temp_range_c: [37.5, 39.5] # Safe temperature range
+
+# GPS Module
+gps:
+  port: "/dev/ttyS0"         # UART port (Pi GPIO 14/15)
+  baudrate: 9600
+  update_hz: 10
+  enabled: true
+
+# Sensors (LilyPad I2C)
+sensors:
+  enabled: false             # Set true when LilyPad is connected
+  i2c_bus: 1
+  hr_sensor_addr: 0x57       # Heart rate sensor I2C address
+  temp_sensor_addr: 0x48     # Temperature sensor I2C address
+  accel_addr: 0x18           # Accelerometer I2C address
+
+# Geofencing
+geofence:
+  home_zone:
+    lat: 45.5152             # Your home latitude
+    lon: -122.6784           # Your home longitude
+    radius_meters: 50        # Geofence radius
+  escape_radius_meters: 200  # "Escaped" alert radius
+  check_interval_sec: 30
+
+# Health Monitoring
+health:
+  check_interval_sec: 60
+  hr_alert_high: 160         # bpm — alert if above
+  hr_alert_low: 40           # bpm — alert if below
+  temp_alert_high: 40.0      # °C
+  temp_alert_low: 37.0       # °C
+  inactivity_alert_min: 180  # minutes of no movement
+
+# Behavior
+behavior:
+  learning_days: 14          # Days to establish baseline routine
+  walk_duration_min: 30      # Expected walk duration
+  meal_times: ["07:00", "17:00"]  # Feeding schedule
+
+# Voice
+voice:
+  tts_enabled: false
+  stt_enabled: false
+  bark_detection: false
+  audio_device: 0            # ALSA device index
+
+# Alerts
+alerts:
+  telegram:
+    enabled: true
+    bot_token: "YOUR_TELEGRAM_BOT_TOKEN"
+    chat_id: "YOUR_CHAT_ID"
+  local_log: true
+  sms_enabled: false
+
+# Data Logging
+logging:
+  gps_track_dir: "data/gps_tracks"
+  health_log_dir: "data/health_logs"
+  behavior_dir: "data/behavior"
+  zones_file: "data/zones.json"
+  retention_days: 90
+
+# Hermes Integration
+hermes:
+  api_port: 9110             # Local API for Hermes to query
+  skill_name: "dog-agent"
+  profile_name: "dog"

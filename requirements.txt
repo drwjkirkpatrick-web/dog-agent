@@ -1,0 +1,29 @@
+# Dog Agent Python Dependencies
+
+# Core
+pyserial>=3.5          # GPS UART communication
+smbus2>=0.4.0          # I2C for LilyPad sensors
+requests>=2.31.0       # HTTP for Hermes API calls
+
+# GPS
+pynmea2>=1.18.0        # NMEA sentence parsing
+
+# Audio / Voice
+pyaudio>=0.2.11        # Microphone input
+sounddevice>=0.4.6     # Audio capture (alternative)
+numpy>=1.24.0          # Audio processing
+scipy>=1.10.0          # Signal processing (bark detection)
+
+# Data & Analysis
+pandas>=2.0.0          # Time-series analysis
+python-dateutil>=2.8.0 # Date parsing
+
+# Config
+pyyaml>=6.0            # YAML config parsing
+
+# Optional: Cellular hat
+# pyserial handles this too — same UART interface
+
+# Optional: Faster bark detection with ML
+# torch>=2.0.0         # PyTorch for audio classification
+# torchaudio>=2.0.0    # Audio ML toolkit
