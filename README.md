@@ -12,8 +12,6 @@
 
 ## ✨ What Makes Dog Agent Extraordinary
 
-> "If Tesla made a dog collar, this would be it."
-
 Dog Agent transforms any Raspberry Pi into a sophisticated intelligence platform that monitors, protects, and understands your dog. From urban apartments to remote wilderness — from quick potty breaks to month-long adventures — Dog Agent keeps you connected to what matters most.
 
 **36 specialized modules. 27,000 lines of Python. 150+ HTTP APIs. One purpose: Your dog's wellbeing.**
@@ -239,6 +237,22 @@ python src/main.py --all
 - E-paper display ($25)
 - nRF52840 beacon ($15)
 - **Total: ~$280**
+
+### Pi Zero 2W Maxed Out
+*Pushing the smallest Pi to its absolute limit — compact yet capable*
+- Raspberry Pi Zero 2W ($15)
+- NEO-M9N GPS (compact) ($25)
+- LilyPad sensors (sewn into vest) ($30)
+- BNO055 IMU (fall detection + dead reckoning) ($15)
+- RFM95W LoRa (long-range backup) ($15)
+- TP4056 + 18650 battery + 5W solar ($20)
+- Adafruit 2.13" e-paper ($25)
+- nRF52840 BLE beacon (coin cell backup) ($15)
+- Piezo haptic motor ($5)
+- Flex PCB interconnects (JST-SH, FFC cables) ($10)
+- **Total: ~$175**
+
+*Notes: Zero 2W handles all modules with care — CPU governor set to conservative, modules staggered startup, aggressive caching. USB hub required for multiple devices. Camera CSI port repurposed for parallel device interface.*
 
 ---
 
