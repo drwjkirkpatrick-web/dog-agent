@@ -45,6 +45,13 @@ from typing import Any, Dict, List, Optional
 
 import yaml
 
+# v4.0: Import shared infrastructure
+try:
+    from shared import ConfigCache, ConnectionPool
+    SHARED_AVAILABLE = True
+except ImportError:
+    SHARED_AVAILABLE = False
+
 # ---------------------------------------------------------------------------
 # Logging
 # ---------------------------------------------------------------------------
