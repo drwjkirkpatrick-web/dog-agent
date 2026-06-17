@@ -1,13 +1,13 @@
-# 🐕 Dog Agent v4.0 — The Performance Edition
+# 🐕 Dog Agent v5.0 — The Perception & Precision Edition
 
-[![Version](https://img.shields.io/badge/version-4.0-orange)](https://github.com/drwjkirkpatrick-web/dog-agent)
-[![Modules](https://img.shields.io/badge/modules-36-green)](https://github.com/drwjkirkpatrick-web/dog-agent)
-[![Performance](https://img.shields.io/badge/optimized-10x-red)](https://github.com/drwjkirkpatrick-web/dog-agent)
+[![Version](https://img.shields.io/badge/version-5.0-brightgreen)](https://github.com/drwjkirkpatrick-web/dog-agent)
+[![Modules](https://img.shields.io/badge/modules-46-success)](https://github.com/drwjkirkpatrick-web/dog-agent)
+[![Precision](https://img.shields.io/badge/precision-RTK%20%2B%20UWB-critical)](https://github.com/drwjkirkpatrick-web/dog-agent)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
 **The world's most comprehensive open-source wearable AI for dogs.**
 
-*Never wonder. Never worry. Always connected.*
+*Version 5.0 — 46 modules — Kalman sensor fusion — RTK GPS — UWB indoor positioning — Gait, sleep, collision, and magnetic anomaly detection*
 
 ---
 
@@ -15,21 +15,26 @@
 
 Dog Agent transforms any Raspberry Pi into a sophisticated intelligence platform that monitors, protects, and understands your dog. From urban apartments to remote wilderness — from quick potty breaks to month-long adventures — Dog Agent keeps you connected to what matters most.
 
-**36 specialized modules. 27,000 lines of Python. 150+ HTTP APIs. One purpose: Your dog's wellbeing.**
+**46 specialized modules. 32,000+ lines of Python. 170+ HTTP APIs. One purpose: Your dog's wellbeing.**
 
 ---
 
 ## 🎯 The Five Pillars
 
 ### 1. 📡 **Never Lose Track**
-- **Multi-Constellation GPS**: GPS + GLONASS + Galileo + BeiDou — the most accurate positioning possible
+- **Sensor Fusion Engine**: Kalman-filter fusion of GPS + IMU + dead reckoning — smoother tracks, fewer dropouts
+- **RTK Differential GPS**: u-blox NEO-F9P centimeter-level accuracy for precise boundaries
+- **UWB Indoor Positioning**: Decawave DWM1000 sub-meter tracking inside homes and kennels
+- **GPS Security**: Detects spoofing, jamming, and impossible jumps; auto-falls back to IMU/LoRa
+- **Multi-Constellation GPS**: GPS + GLONASS + Galileo + BeiDou for urban canyon accuracy
 - **LoRaWAN Backup**: 10km+ range when cellular fails
-- **Dead Reckoning**: IMU step-counting works even underground, indoors, or in dense forest
+- **Dead Reckoning**: IMU step-counting works even underground, indoors, or dense forest
 - **Emergency BLE Beacon**: 6-month coin cell backup if main system fails
-- **Adaptive GPS**: Intelligently scales from 10Hz updates to 1/5min to save 80% power
+- **Adaptive GPS**: Scales from 10Hz to 1/5min to save 80% power
 
 ### 2. 🚨 **Emergency Response**
 - **Fall Detection**: BNO055 IMU detects impacts and immobility
+- **Vehicle Collision Detection**: Distinguishes vehicle strikes from normal falls
 - **ML Bark Classification**: TensorFlow Lite distinguishes play from distress from alert
 - **3-Level Escalation**: Primary → Secondary → Emergency contacts with automatic timeout
 - **Panic Button**: Physical button for owner emergencies
@@ -42,6 +47,9 @@ Dog Agent transforms any Raspberry Pi into a sophisticated intelligence platform
 - **Power Manager**: ACTIVE/IDLE/DEEP_SLEEP automatic transitions
 
 ### 4. 🧠 **Predictive Health**
+- **Gait Analysis**: Detects limping, lameness, and stride asymmetry from IMU
+- **Sleep Posture & Rest Quality**: Tracks sleeping position, restlessness, and tremors
+- **Magnetic Anomaly Detection**: Warns of buried cables, metal hazards, and vehicle proximity
 - **Long-Term Trends**: Weeks and months of vital pattern analysis
 - **ML Anomaly Detection**: Catches changes *before* they become critical
 - **Vet Reports**: Professional PDF health summaries
@@ -156,6 +164,20 @@ python src/main.py --all
 | `vet_report.py` | 9145 | Professional PDF reports |
 | `predictive_health.py` | 9147 | ML anomaly detection |
 
+### Perception & Precision (10 modules) — *NEW in v5.0*
+| Module | Port | Purpose |
+|--------|------|---------|
+| `sensor_fusion.py` | 9148 | Kalman-filter fused position/velocity |
+| `gait_analyzer.py` | 9149 | Limping/gait symmetry detection |
+| `gps_rtk.py` | 9150 | RTK differential GPS (cm accuracy) |
+| `uwb_indoor.py` | 9151 | Ultra-wideband indoor positioning |
+| `smart_geofence.py` | 9152 | ML-learned adaptive safe zones |
+| `gps_security.py` | 9153 | Spoofing/jamming detection |
+| `sleep_posture.py` | 9154 | Rest quality & tremor analysis |
+| `collision_detector.py` | 9155 | Vehicle impact detection |
+| `magnetic_anomaly.py` | 9156 | Magnetic hazard detection |
+| `sampling_optimizer.py` | 9157 | Adaptive sensor rate control |
+
 ### Multi-Dog (1 module)
 | Module | Port | Purpose |
 |--------|------|---------|
@@ -167,6 +189,10 @@ python src/main.py --all
 
 ### Never Lose Track
 ```
+✓ Sensor fusion — GPS + IMU + dead reckoning for smoother tracks
+✓ RTK GPS: centimeter-level accuracy
+✓ UWB indoor positioning: sub-meter home tracking
+✓ GPS security: spoofing/jamming detection
 ✓ 4-constellation GPS for urban canyon accuracy
 ✓ LoRaWAN works 10km+ in wilderness
 ✓ Dead reckoning when GPS unavailable
@@ -177,10 +203,23 @@ python src/main.py --all
 ### Emergency Response
 ```
 ✓ Fall detection with severity classification
+✓ Vehicle collision detection
 ✓ ML bark analysis (play/distress/alert)
 ✓ 3-level contact escalation
 ✓ Panic button with GPS coordinates
 ✓ Automatic emergency classification
+```
+
+### Predictive Health
+```
+✓ Gait analysis: limping/lameness detection
+✓ Sleep posture & rest quality tracking
+✓ Magnetic anomaly detection
+✓ Trend analysis over weeks/months
+✓ ML anomaly pre-detection
+✓ Vet-ready PDF reports
+✓ Breed-specific activity goals
+✓ Multi-dog household support
 ```
 
 ### Month-Long Operation
@@ -190,15 +229,6 @@ python src/main.py --all
 ✓ Predictive "time remaining"
 ✓ Automatic mode transitions
 ✓ Coin cell backup: 6 months
-```
-
-### Predictive Health
-```
-✓ Trend analysis over weeks/months
-✓ ML anomaly pre-detection
-✓ Vet-ready PDF reports
-✓ Breed-specific activity goals
-✓ Multi-dog household support
 ```
 
 ### Beautiful Experience
@@ -336,6 +366,6 @@ python src/main.py --simulate
 
 ---
 
-*Version 4.0 — 36 modules — Optimized shared infrastructure — 10x performance improvements*
+*Version 5.0 — 46 modules — Perception & Precision Edition — RTK + UWB + sensor fusion*
 
 **[⭐ Star this repo](https://github.com/drwjkirkpatrick-web/dog-agent) | [🐛 Report issues](https://github.com/drwjkirkpatrick-web/dog-agent/issues) | [💡 Suggest features](https://github.com/drwjkirkpatrick-web/dog-agent/discussions)**

@@ -97,6 +97,18 @@ hermes:
   skill_name: "dog-agent"
   profile_name: "dog"
 
+# RTK / Differential GPS Module
+# Requires u-blox NEO-M8P or NEO-F9P receiver + NTRIP caster access
+gps_rtk:
+  enabled: false
+  receiver_port: "/dev/ttyACM1"
+  receiver_baud: 115200
+  ntrip_caster: "rtk2go.com"
+  ntrip_mountpoint: ""
+  ntrip_user: ""
+  ntrip_password: ""
+  ntrip_port: 2101
+
 # Emergency BLE Beacon (nRF52840/nRF51822 backup tracker)
 emergency_beacon:
   enabled: false              # Set true when nRF module connected

@@ -157,10 +157,86 @@ MODULE_DEFS: Dict[str, Dict[str, Any]] = {
         "sim_flag": "--simulate",
         "has_port": True,
     },
+    "gps_rtk": {
+        "module": "gps_rtk",
+        "port": 9150,
+        "config_key": "gps_rtk.enabled",
+        "sim_flag": "--simulate",
+        "has_port": True,
+    },
+    # v5.0 — Next-generation modules
+    "sensor_fusion": {
+        "module": "sensor_fusion",
+        "port": 9148,
+        "config_key": "sensor_fusion.enabled",
+        "sim_flag": "--simulate",
+        "has_port": True,
+    },
+    "gait_analyzer": {
+        "module": "gait_analyzer",
+        "port": 9149,
+        "config_key": "gait_analyzer.enabled",
+        "sim_flag": "--simulate",
+        "has_port": True,
+    },
+    "uwb_indoor": {
+        "module": "uwb_indoor",
+        "port": 9151,
+        "config_key": "uwb_indoor.enabled",
+        "sim_flag": "--simulate",
+        "has_port": True,
+    },
+    "smart_geofence": {
+        "module": "smart_geofence",
+        "port": 9152,
+        "config_key": "smart_geofence.enabled",
+        "sim_flag": "--simulate",
+        "has_port": True,
+    },
+    "gps_security": {
+        "module": "gps_security",
+        "port": 9153,
+        "config_key": "gps_security.enabled",
+        "sim_flag": "--simulate",
+        "has_port": True,
+    },
+    "sleep_posture": {
+        "module": "sleep_posture",
+        "port": 9154,
+        "config_key": "sleep_posture.enabled",
+        "sim_flag": "--simulate",
+        "has_port": True,
+    },
+    "collision_detector": {
+        "module": "collision_detector",
+        "port": 9155,
+        "config_key": "collision_detector.enabled",
+        "sim_flag": "--simulate",
+        "has_port": True,
+    },
+    "magnetic_anomaly": {
+        "module": "magnetic_anomaly",
+        "port": 9156,
+        "config_key": "magnetic_anomaly.enabled",
+        "sim_flag": "--simulate",
+        "has_port": True,
+    },
+    "sampling_optimizer": {
+        "module": "sampling_optimizer",
+        "port": 9157,
+        "config_key": "sampling_optimizer.enabled",
+        "sim_flag": "--simulate",
+        "has_port": True,
+    },
 }
 
 # Ordering for dashboard display
-MODULE_ORDER = ["gps", "sensors", "health", "geofence", "behavior", "voice", "logger", "power", "lorawan"]
+MODULE_ORDER = [
+    "gps", "sensors", "health", "geofence", "behavior", "voice", "logger", "power",
+    "lorawan", "gps_rtk", "sensor_fusion", "gait_analyzer", "uwb_indoor",
+    "smart_geofence", "gps_security", "sleep_posture", "collision_detector",
+    "magnetic_anomaly", "sampling_optimizer",
+]
 
 # ---------------------------------------------------------------------------
 # Config helpers
