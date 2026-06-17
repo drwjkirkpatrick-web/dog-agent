@@ -1,9 +1,9 @@
 # 🐕 Dog Agent v5.0 — The Perception & Precision Edition
 
-[![Version](https://img.shields.io/badge/version-5.0-brightgreen)](https://github.com/drwjkirkpatrick-web/dog-agent)
-[![Modules](https://img.shields.io/badge/modules-46-success)](https://github.com/drwjkirkpatrick-web/dog-agent)
-[![Precision](https://img.shields.io/badge/precision-RTK%20%2B%20UWB-critical)](https://github.com/drwjkirkpatrick-web/dog-agent)
-[![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+[![Version](https://img.shields.io/badge/version-5.0-brightgreen?style=for-the-badge&logo=github)](https://github.com/drwjkirkpatrick-web/dog-agent)
+[![Modules](https://img.shields.io/badge/modules-46-success?style=for-the-badge&logo=python)](https://github.com/drwjkirkpatrick-web/dog-agent)
+[![Precision](https://img.shields.io/badge/precision-RTK%20%2B%20UWB-critical?style=for-the-badge&logo=mapbox)](https://github.com/drwjkirkpatrick-web/dog-agent)
+[![License](https://img.shields.io/badge/license-MIT-blue?style=for-the-badge)](./LICENSE)
 
 **The world's most comprehensive open-source wearable AI for dogs.**
 
